@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 export default function Header() {
   return (
@@ -39,12 +40,12 @@ export default function Header() {
               </li>
             </ul>
             <form className="form-inline my-2 my-lg-0">
-              <button className="btn btn-outline-primary my-2 my-sm-0" type="submit">
+              <Link className="btn btn-outline-primary my-2 my-sm-0" to="/auth/login">
                 Login
-              </button>
-              <button className="btn btn-outline-primary my-2 ml-2 my-sm-0" type="submit">
+              </Link>
+              <Link className="btn btn-outline-primary my-2 ml-2 my-sm-0" to="/auth/register">
                 Signup
-              </button>
+              </Link>
             </form>
           </div>
         </div>
