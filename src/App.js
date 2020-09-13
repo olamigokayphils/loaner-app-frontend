@@ -8,6 +8,8 @@ import Login from "./layout/auth/Login";
 import Signup from "./layout/auth/Signup";
 import Main from "./Main";
 import { loadUser } from "./authentication/action";
+import { Provider as AlertProvider, positions } from "react-alert";
+import AlertTemplate from "react-alert-template-basic";
 
 function App() {
   const dispatch = useDispatch();
@@ -17,16 +19,24 @@ function App() {
     dispatch(loadUser());
   });
 
+  // ALERT OPTIONS
+  const alertOptions = {
+    timeout: 3000,
+    position: positions.TOP_RIGHT,
+  };
+
   return (
-    <Router>
-      <Fragment>
-        <Switch>
-          <PrivateRoute exact path="/" component={Main} />
-          <Route exact path="/auth/login" component={Login} />
-          <Route exact path="/auth/register" component={Signup} />
-        </Switch>
-      </Fragment>
-    </Router>
+    <AlertProvider template={AlertTemplate} {...alertOptions}>
+      <Router>
+        <Fragment>
+          <Switch>
+            <PrivateRoute exact path="/" component={Main} />
+            <Route exact path="/auth/login" component={Login} />
+            <Route exact path="/auth/register" component={Signup} />
+          </Switch>
+        </Fragment>
+      </Router>
+    </AlertProvider>
   );
 }
 

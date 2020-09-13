@@ -1,5 +1,7 @@
 import axios from "axios";
 import { USER_LOADING, USER_LOADED, AUTH_ERROR, LOGIN_SUCCESS, LOGIN_FAIL } from "../rootAction/types";
+import { returnErrors } from "../rootAction/messages";
+
 import { BASE_URL } from "../rootAction/env";
 
 //TOKEN CONFIG
@@ -38,7 +40,7 @@ export const loadUser = () => (dispatch, getState) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      dispatch(returnErrors(err.response.data, err.response.status));
       dispatch({
         type: AUTH_ERROR,
       });
@@ -56,7 +58,7 @@ export const loginUser = (email, password) => (dispatch, getState) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      dispatch(returnErrors(err.response.data, err.response.status));
       dispatch({
         type: LOGIN_FAIL,
       });

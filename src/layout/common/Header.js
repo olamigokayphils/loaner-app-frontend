@@ -1,6 +1,7 @@
-import React from "react";
+import React, { Fragment } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import Alerts from "./Alerts";
 
 export default function Header() {
   const auth = useSelector((state) => state.authentication);
@@ -98,5 +99,10 @@ export default function Header() {
       </nav>
     );
   };
-  return <div>{auth.isAuthenticated ? renderAuthenticatedNav() : renderNonAuthenticatedNav()}</div>;
+  return (
+    <Fragment>
+      <Alerts />
+      <div>{auth.isAuthenticated ? renderAuthenticatedNav() : renderNonAuthenticatedNav()}</div>
+    </Fragment>
+  );
 }

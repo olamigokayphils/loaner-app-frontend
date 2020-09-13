@@ -1,5 +1,5 @@
 import React, { Fragment, useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Header from "../common/Header";
 import { loginUser } from "../../authentication/action";
 
@@ -16,17 +16,28 @@ export default function Login() {
     }
   };
   const dispatch = useDispatch();
+  const error = useSelector((state) => state.errors);
+
+  useEffect(() => {
+    setDisplaySpinner(false);
+  }, [error]);
 
   const proceedToLogin = () => {
     setDisplaySpinner(true);
     dispatch(loginUser(userEmail, userPassword));
   };
+
   return (
     <Fragment>
       <Header />
       <div className="container mt-5">
         <div className="col-sm-6 offset-3 card card-body shadow">
-          <form onSubmit={() => proceedToLogin()}>
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              proceedToLogin();
+            }}
+          >
             <h3 className="text-center">Login</h3>
             <div className="form-group">
               <label>Email</label>
@@ -40,9 +51,11 @@ export default function Login() {
               <button hidden={displaySpinner} className="btn btn-success btn-block" type="submit">
                 Login
               </button>
-              <div hidden={!displaySpinner} class="spinner-border text-success" role="status">
+              {/** SPINNER */}
+              <div hidden={!displaySpinner} class="spinner-border mt-3 text-success" role="status">
                 <span class="sr-only">Loading...</span>
               </div>
+              {/** END SPINNER */}
             </div>
 
             <p className="text-center">
