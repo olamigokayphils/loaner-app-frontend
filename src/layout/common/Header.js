@@ -1,9 +1,12 @@
 import React, { Fragment } from "react";
-import { useSelector } from "react-redux";
+import PropTypes from "prop-types";
+import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import Alerts from "./Alerts";
+import { logoutUser } from "../../authentication/action";
 
 export default function Header() {
+  const dispatch = useDispatch();
   const auth = useSelector((state) => state.authentication);
 
   const renderAuthenticatedNav = () => {
@@ -44,9 +47,9 @@ export default function Header() {
               </li>
             </ul>
             <form className="form-inline my-2 my-lg-0">
-              <Link className="btn btn-outline-primary my-2 my-sm-0" to="/">
+              <button className="btn btn-outline-primary my-2 my-sm-0" type="button" onClick={() => dispatch(logoutUser())}>
                 Logout
-              </Link>
+              </button>
             </form>
           </div>
         </div>
@@ -106,3 +109,7 @@ export default function Header() {
     </Fragment>
   );
 }
+
+Header.propTypes = {
+  logoutUser: PropTypes.func,
+};

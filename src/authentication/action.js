@@ -1,5 +1,5 @@
 import axios from "axios";
-import { USER_LOADING, USER_LOADED, AUTH_ERROR, LOGIN_SUCCESS, LOGIN_FAIL } from "../rootAction/types";
+import { USER_LOADING, USER_LOADED, AUTH_ERROR, LOGIN_SUCCESS, LOGIN_FAIL, LOGOUT_SUCCESS } from "../rootAction/types";
 import { returnErrors } from "../rootAction/messages";
 
 import { BASE_URL } from "../rootAction/env";
@@ -62,5 +62,19 @@ export const loginUser = (email, password) => (dispatch, getState) => {
       dispatch({
         type: LOGIN_FAIL,
       });
+    });
+};
+
+// LOGOUT USER
+export const logoutUser = () => (dispatch, getState) => {
+  axios
+    .post(`${BASE_URL}/auth/logout`, {}, tokenConfig(getState))
+    .then((res) => {
+      dispatch({
+        type: LOGOUT_SUCCESS,
+      });
+    })
+    .catch((err) => {
+      dispatch(returnErrors(err.response.data, err.response.status));
     });
 };
