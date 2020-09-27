@@ -1,7 +1,8 @@
-import { GET_DASHBOARD } from "../rootAction/types";
+import { GET_DASHBOARD, REQUEST_LOAN } from "../rootAction/types";
 
 const initialState = {
   userDashboard: [],
+  loanRequest: [],
 };
 
 export default function (state = initialState, action) {
@@ -10,6 +11,11 @@ export default function (state = initialState, action) {
       return {
         ...state,
         userDashboard: action.payload,
+      };
+    case REQUEST_LOAN:
+      return {
+        ...state,
+        loanRequest: [...state.loanRequest, action.payload],
       };
     default:
       return state;

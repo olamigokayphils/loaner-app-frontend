@@ -1,21 +1,19 @@
 import React, { Fragment, useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Modal } from "react-bootstrap";
+import { requestNewLoan, getUserDashboard } from "../../dashboard/action";
+
 const Lodar = require("../../assets/126.gif");
 
 export default function LoanHistory() {
+  const dispatch = useDispatch();
   const [userLoanHistory, setLoanHistory] = useState([]);
   const [displaySpinner, setDisplaySpinner] = useState(true);
+  const [loanAmount, setLoanAmount] = useState("");
+  const [loanAmountError, setLoanAmountError] = useState("");
+  const [displayRequestSpinner, setDisplayRequestSpinner] = useState(false);
   const [requestLoanModalOpen, setRequestLoanModalOpen] = useState(false);
   const [withdrawalModalOpen, setWithdrawalModalOpen] = useState(false);
-
-  // useEffect(() => {
-  //   if (dashboard) {
-  //     setDisplaySpinner(false);
-  //     console.log("Yikes", dashboard.loans);
-  //     setLoanHistory(dashboard.loans);
-  //   }
-  // }, [dashboard]);
 
   const usePrevious = (value) => {
     const ref = useRef();
@@ -28,11 +26,29 @@ export default function LoanHistory() {
   const dashboard = useSelector((state) => state.dashboard.userDashboard);
   const prevDashBoard = usePrevious(dashboard);
 
+  const requestLoanResponse = useSelector((state) => state.dashboard.loanRequest);
+  const prevRequestLoanResponse = usePrevious(requestLoanResponse);
+
   useEffect(() => {
     if (prevDashBoard) {
-      if (prevDashBoard !== dashboard) setDisplaySpinner(false);
-      console.log("Yikes", dashboard.loans);
-      setLoanHistory(dashboard.loans);
+      if (prevDashBoard !== dashboard) {
+        setDisplaySpinner(false);
+        setLoanHistory(dashboard.loans);
+      }
+    }
+
+    if (prevRequestLoanResponse) {
+      if (prevRequestLoanResponse.length !== requestLoanResponse.length) {
+        if (requestLoanResponse[requestLoanResponse.length - 1]["status"] == "success") {
+          // CLOSE REQUEST LOAN MODAL
+          setRequestLoanModalOpen(false);
+          // DIPATCH "GET DASHBOARD DATA"
+          //Set display spinner to true
+          setDisplaySpinner(true);
+          // get Dashboard data
+          dispatch(getUserDashboard());
+        }
+      }
     }
   });
 
@@ -44,45 +60,56 @@ export default function LoanHistory() {
     setWithdrawalModalOpen(false);
   };
 
+  const userRequestsLoan = () => {
+    if (loanAmount !== "" && Number(loanAmount) !== NaN) {
+      if (Number(loanAmount) < 1000) {
+        setLoanAmountError("Amount cannot be less than 1000");
+      } else if (Number(loanAmount) > 50000) {
+        setLoanAmountError("Amount cannot be greater than 50,000");
+      } else {
+        // Dispatch Action
+        setDisplayRequestSpinner(true);
+        dispatch(requestNewLoan(loanAmount));
+      }
+    } else {
+      setLoanAmountError("Invalid Amount");
+    }
+  };
+
+  const returnLoanBadge = (loanStatus) => {
+    switch (loanStatus) {
+      case "processing":
+        return <span className="badge badge-primary text-capitalize">{loanStatus}</span>;
+      case "running":
+        return <span className="badge badge-warning text-capitalize">{loanStatus}</span>;
+      case "defaulting":
+        return <span className="badge badge-danger text-capitalize">{loanStatus}</span>;
+      case "rejected":
+        return <span className="badge badge-secondary text-capitalize">{loanStatus}</span>;
+      case "paid":
+        return <span className="badge badge-success text-capitalize">{loanStatus}</span>;
+    }
+  };
+
   const renderLoanHistory = () => {
     return (
       <div>
-        <div className="card card-body shadow mt-3">
-          <div className="loan-history-card">
-            <div>
-              Request Date: Aug 2, 2020 <br />
-              Amount: ₦15,000
+        {userLoanHistory.map((record, index) => {
+          return (
+            <div key={index} className="card card-body shadow mt-3">
+              <div className="loan-history-card">
+                <div style={{ textAlign: "initial" }}>
+                  Request Date: {new Date(record.requestDate).toDateString()} <br />
+                  Amount: ₦{`${record.amount}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                </div>
+                <div>
+                  Status: {returnLoanBadge(record.status)} <br />
+                  Interest: 10%
+                </div>
+              </div>
             </div>
-            <div>
-              Status: <span className="badge badge-warning">Running</span> <br />
-              Interest: 10%
-            </div>
-          </div>
-        </div>
-        <div className="card card-body shadow mt-3">
-          <div className="loan-history-card">
-            <div>
-              Request Date: Jul 1, 2020 <br />
-              Amount: ₦10,000
-            </div>
-            <div>
-              Status: <span className="badge badge-success">Paid</span> <br />
-              Interest: 10%
-            </div>
-          </div>
-        </div>
-        <div className="card card-body shadow mt-3">
-          <div className="loan-history-card">
-            <div>
-              Request Date: Jan 10, 2020 <br />
-              Amount: ₦35,000
-            </div>
-            <div>
-              Status: <span className="badge badge-success">Paid</span> <br />
-              Interest: 10%
-            </div>
-          </div>
-        </div>
+          );
+        })}
       </div>
     );
   };
@@ -90,9 +117,7 @@ export default function LoanHistory() {
   const renderNoLoanHistory = () => {
     return (
       <div>
-        <p>
-          <h5 className="font-weight-bold">You currently do not have any Loan History</h5>
-        </p>
+        <h5 className="font-weight-bold">You currently do not have any Loan History</h5>
       </div>
     );
   };
@@ -110,13 +135,37 @@ export default function LoanHistory() {
               Maximum Loan Amount <b>₦50,000</b>
             </h4>
             <br />
-            <form>
+            <form
+              onSubmit={(event) => {
+                event.preventDefault();
+                userRequestsLoan();
+              }}
+            >
               <div className="form-group">
                 <label>Loan Amount</label>
-                <input placeholder="Enter request Amount" className="form-control" type="number" />
+                <div className="mb-3">
+                  <small className="text-danger">{loanAmountError}</small>
+                </div>
+                <input
+                  placeholder="Enter request Amount"
+                  value={loanAmount}
+                  onChange={(event) => {
+                    setLoanAmountError("");
+                    setLoanAmount(event.target.value);
+                  }}
+                  className="form-control"
+                  type="number"
+                />
               </div>
-              <div className="form-group">
-                <button className="btn btn-success btn-block">Submit</button>
+              <div className="form-group text-center">
+                <button hidden={displayRequestSpinner} className="btn btn-success btn-block">
+                  Submit
+                </button>
+                {/** SPINNER */}
+                <div hidden={!displayRequestSpinner} class="spinner-border mt-3 text-success" role="status">
+                  <span class="sr-only">Loading...</span>
+                </div>
+                {/** END SPINNER */}
               </div>
             </form>
           </div>

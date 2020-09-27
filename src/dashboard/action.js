@@ -1,5 +1,5 @@
 import axios from "axios";
-import { GET_DASHBOARD } from "../rootAction/types";
+import { GET_DASHBOARD, REQUEST_LOAN } from "../rootAction/types";
 import { returnErrors } from "../rootAction/messages";
 
 import { BASE_URL } from "../rootAction/env";
@@ -12,6 +12,21 @@ export const getUserDashboard = () => (dispatch, getState) => {
     .then((res) => {
       dispatch({
         type: GET_DASHBOARD,
+        payload: res.data,
+      });
+    })
+    .catch((err) => {
+      dispatch(returnErrors(err.response.data, err.response.status));
+    });
+};
+
+// REQUEST NEW LOAN
+export const requestNewLoan = (amount) => (dispatch, getState) => {
+  axios
+    .post(`${BASE_URL}/request-loan`, { amount }, tokenConfig(getState))
+    .then((res) => {
+      dispatch({
+        type: REQUEST_LOAN,
         payload: res.data,
       });
     })
