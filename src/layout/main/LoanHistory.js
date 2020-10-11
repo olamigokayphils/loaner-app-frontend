@@ -42,18 +42,29 @@ export default function LoanHistory() {
         if (requestLoanResponse[requestLoanResponse.length - 1]["status"] == "success") {
           // CLOSE REQUEST LOAN MODAL
           setRequestLoanModalOpen(false);
+          setDisplayRequestSpinner(false);
           // DIPATCH "GET DASHBOARD DATA"
           //Set display spinner to true
           setDisplaySpinner(true);
           // get Dashboard data
           dispatch(getUserDashboard());
+        } else if (requestLoanResponse[requestLoanResponse.length - 1]["status"] == "failed") {
+          setDisplayRequestSpinner(false);
+          setLoanAmountError(requestLoanResponse[requestLoanResponse.length - 1]["message"]);
         }
       }
     }
   });
 
   const closeRequestLoanModal = () => {
+    //CLOSES THE MODAL
     setRequestLoanModalOpen(false);
+    // RETURNS REQUEST SPINNER BACK TO DEFAULT
+    setDisplayRequestSpinner(false);
+    // CLEAR AMOUNT
+    setLoanAmount("");
+    // CLEAR ERRORS
+    setLoanAmountError("");
   };
 
   const closeWithdrawalModal = () => {
